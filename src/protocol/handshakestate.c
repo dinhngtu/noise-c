@@ -1402,7 +1402,7 @@ static int noise_handshakestate_write
  *
  * \return NOISE_ERROR_NONE on success.
  * \return NOISE_ERROR_INVALID_PARAM if \a state or \a message is NULL.
- * \return NOISE_ERROR_INVALID_STATE if noise_handshakestate_get_action() is 
+ * \return NOISE_ERROR_INVALID_STATE if noise_handshakestate_get_action() is
  * not NOISE_ACTION_WRITE_MESSAGE.
  * \return NOISE_ERROR_INVALID_LENGTH if \a message is too small to contain
  * all of the bytes that need to be written to it.
@@ -1681,7 +1681,7 @@ static int noise_handshakestate_read
  *
  * \return NOISE_ERROR_NONE on success.
  * \return NOISE_ERROR_INVALID_PARAM if \a state or \a message is NULL.
- * \return NOISE_ERROR_INVALID_STATE if noise_handshakestate_get_action() is 
+ * \return NOISE_ERROR_INVALID_STATE if noise_handshakestate_get_action() is
  * not NOISE_ACTION_READ_MESSAGE.
  * \return NOISE_ERROR_INVALID_LENGTH if the size of \a message is incorrect
  * for the type of handshake packet that we expect.
@@ -1794,6 +1794,34 @@ int noise_handshakestate_split
         err = noise_symmetricstate_split(state->symmetric, receive, send);
     else
         err = noise_symmetricstate_split(state->symmetric, send, receive);
+    if (err == NOISE_ERROR_NONE)
+        state->action = NOISE_ACTION_COMPLETE;
+    return err;
+}
+
+int noise_handshakestate_split_raw
+    (NoiseHandshakeState *state, uint8_t *key1, size_t *len1,
+     uint8_t *key2, size_t *len2)
+{
+    int swap;
+    int err;
+
+    /* Validate the parameters */
+    if (!state)
+        return NOISE_ERROR_INVALID_PARAM;
+    if (state->action != NOISE_ACTION_SPLIT)
+        return NOISE_ERROR_INVALID_STATE;
+    if (!state->symmetric->cipher)
+        return NOISE_ERROR_INVALID_STATE;
+
+    /* Do we need to swap the CipherState objects for the role? */
+    swap = (state->role == NOISE_ROLE_RESPONDER);
+
+    /* Split the CipherState objects out of the SymmetricState */
+    if (swap)
+        err = noise_symmetricstate_split_raw(state->symmetric, key2, len2, key1, len1);
+    else
+        err = noise_symmetricstate_split_raw(state->symmetric, key1, len1, key2, len2);
     if (err == NOISE_ERROR_NONE)
         state->action = NOISE_ACTION_COMPLETE;
     return err;

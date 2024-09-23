@@ -627,4 +627,54 @@ int noise_symmetricstate_split
     return NOISE_ERROR_NONE;
 }
 
+int noise_symmetricstate_split_raw
+    (NoiseSymmetricState *state, uint8_t *key1, size_t *len1,
+     uint8_t *key2, size_t *len2)
+{
+    uint8_t temp_k1[NOISE_MAX_HASHLEN];
+    uint8_t temp_k2[NOISE_MAX_HASHLEN];
+    size_t hash_len;
+    size_t key_len;
+
+    /* Validate the parameters */
+    if (!state)
+        return NOISE_ERROR_INVALID_PARAM;
+    if (!key1 && !key2)
+        return NOISE_ERROR_INVALID_PARAM;
+
+    /* If the state has already been split, then we cannot split again */
+    if (!state->cipher)
+        return NOISE_ERROR_INVALID_STATE;
+
+    key_len = noise_cipherstate_get_key_length(state->cipher);
+    if (key1 && (!len1 || *len1 < key_len))
+        return NOISE_ERROR_INVALID_PARAM;
+    if (key1) {
+        memset(key1, 0, *len1);
+        *len1 = key_len;
+    }
+    if (key2 && (!len2 || *len2 < key_len))
+        return NOISE_ERROR_INVALID_PARAM;
+    if (key2) {
+        memset(key2, 0, *len1);
+        *len2 = key_len;
+    }
+
+    /* Generate the two encryption keys with HKDF */
+    hash_len = noise_hashstate_get_hash_length(state->hash);
+    noise_hashstate_hkdf
+        (state->hash, state->ck, hash_len, state->ck, 0,
+         temp_k1, key_len, temp_k2, key_len);
+
+    if (key1) {
+        memcpy(key2, temp_k2, key_len);
+    }
+    if (key2) {
+        memcpy(key2, temp_k2, key_len);
+    }
+    noise_clean(temp_k1, sizeof(temp_k1));
+    noise_clean(temp_k2, sizeof(temp_k2));
+    return NOISE_ERROR_NONE;
+}
+
 /**@}*/
