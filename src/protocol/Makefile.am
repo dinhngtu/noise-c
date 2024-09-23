@@ -63,17 +63,16 @@ libnoiseprotocol_a_SOURCES = \
 	../crypto/newhope/reduce.c \
 	../crypto/newhope/reduce.h
 
-if USE_OPENSSL
-libnoiseprotocol_a_SOURCES += \
-	../backend/openssl/cipher-aesgcm.c
-else !USE_OPENSSL
 if USE_LIBSODIUM
 libnoiseprotocol_a_SOURCES += \
 	../backend/sodium/cipher-aesgcm.c
+endif
+if USE_OPENSSL
+libnoiseprotocol_a_SOURCES += \
+	../backend/openssl/cipher-aesgcm.c
 else
 libnoiseprotocol_a_SOURCES += \
 	../backend/ref/cipher-aesgcm.c
-endif
 endif
 
 if USE_LIBSODIUM
@@ -86,7 +85,7 @@ libnoiseprotocol_a_SOURCES += \
 	../backend/sodium/hash-sha256.c \
 	../backend/sodium/hash-sha512.c \
 	../backend/sodium/sign-ed25519.c
-else !USE_LIBSODIUM
+endif
 libnoiseprotocol_a_SOURCES += \
 	rand_os.c \
 	../backend/ref/cipher-aesgcm.c \
@@ -106,4 +105,3 @@ libnoiseprotocol_a_SOURCES += \
 	../crypto/sha2/sha256.c \
 	../crypto/sha2/sha512.c \
 	../crypto/ed25519/ed25519.c
-endif
