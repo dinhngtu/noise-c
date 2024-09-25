@@ -647,16 +647,18 @@ int noise_symmetricstate_split_raw
         return NOISE_ERROR_INVALID_STATE;
 
     key_len = noise_cipherstate_get_key_length(state->cipher);
-    if (key1 && (!len1 || *len1 < key_len))
-        return NOISE_ERROR_INVALID_PARAM;
     if (key1) {
+        if (!len1 || *len1 < key_len) {
+            return NOISE_ERROR_INVALID_PARAM;
+        }
         memset(key1, 0, *len1);
         *len1 = key_len;
     }
-    if (key2 && (!len2 || *len2 < key_len))
-        return NOISE_ERROR_INVALID_PARAM;
     if (key2) {
-        memset(key2, 0, *len1);
+        if (!len2 || *len2 < key_len) {
+            return NOISE_ERROR_INVALID_PARAM;
+        }
+        memset(key2, 0, *len2);
         *len2 = key_len;
     }
 
@@ -667,7 +669,7 @@ int noise_symmetricstate_split_raw
          temp_k1, key_len, temp_k2, key_len);
 
     if (key1) {
-        memcpy(key2, temp_k2, key_len);
+        memcpy(key1, temp_k1, key_len);
     }
     if (key2) {
         memcpy(key2, temp_k2, key_len);
