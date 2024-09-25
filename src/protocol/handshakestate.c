@@ -1800,8 +1800,8 @@ int noise_handshakestate_split
 }
 
 int noise_handshakestate_split_raw
-    (NoiseHandshakeState *state, uint8_t *key1, size_t *len1,
-     uint8_t *key2, size_t *len2)
+    (NoiseHandshakeState *state, uint8_t *skey, size_t *sklen,
+     uint8_t *rkey, size_t *rklen)
 {
     int swap;
     int err;
@@ -1819,9 +1819,9 @@ int noise_handshakestate_split_raw
 
     /* Split the CipherState objects out of the SymmetricState */
     if (swap)
-        err = noise_symmetricstate_split_raw(state->symmetric, key2, len2, key1, len1);
+        err = noise_symmetricstate_split_raw(state->symmetric, rkey, rklen, skey, sklen);
     else
-        err = noise_symmetricstate_split_raw(state->symmetric, key1, len1, key2, len2);
+        err = noise_symmetricstate_split_raw(state->symmetric, skey, sklen, rkey, rklen);
     if (err == NOISE_ERROR_NONE)
         state->action = NOISE_ACTION_COMPLETE;
     return err;

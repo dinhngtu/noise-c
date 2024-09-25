@@ -74,8 +74,8 @@ int noise_handshakestate_read_message
 int noise_handshakestate_split
     (NoiseHandshakeState *state, NoiseCipherState **send, NoiseCipherState **receive);
 int noise_handshakestate_split_raw
-    (NoiseHandshakeState *state, uint8_t *key1, size_t *len1,
-     uint8_t *key2, size_t *len2);
+    (NoiseHandshakeState *state, uint8_t *skey, size_t *sklen,
+     uint8_t *rkey, size_t *rklen);
 int noise_handshakestate_get_handshake_hash
     (const NoiseHandshakeState *state, uint8_t *hash, size_t max_len);
 
